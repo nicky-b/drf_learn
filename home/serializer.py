@@ -7,34 +7,37 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField() 
 
 
-class ColorSerializer(serializers.ModelSerializer):
+# class ColorSerializer(serializers.ModelSerializer):
 
-    class Meta():
-        model = Color
-        fields = ['color_name']
+#     class Meta():
+#         model = Color
+#         fields = ['color_name']
 
 
 class PersonSerializer(serializers.ModelSerializer):
 
-    color = ColorSerializer()
-    color_info = serializers.SerializerMethodField()
+    #color = ColorSerializer()
+    #color_info = serializers.SerializerMethodField()
     class Meta():
         model = Person
         fields = '__all__'
         #depth = 1 # depth=1 will return all the fields of the foreignkey
 
-    def get_color_info(self, obj): #function name should be get_xxx serializer method field name
-        color_obj = Color.objects.get(id = obj.color.id)
-        return {'color_name': color_obj.color_name, 'hex_code':'#001' }
+    # def get_color_info(self, obj): #function name should be get_xxx serializer method field name
+    #     color_obj = Color.objects.get(id = obj.color.id)
+    #     return {'color_name': color_obj.color_name, 'hex_code':'#001' }
 
     def validate(self, data):
-
         special_characters = "!@#$%^&*()_+-=?</"
-        if any(c in special_characters for c in data[ 'name']):
-            raise serializers.ValidationError( "name cannot contain special chars" )
+        # Validate 'name' field only if it is present in the request data
+        if 'name' in data:
+            if any(c in special_characters for c in data[ 'name']):
+                raise serializers.ValidationError( "name cannot contain special chars" )
 
-        if data['age'] < 18:
-            raise serializers.ValidationError("age should be above 18years")
+        # Validate 'age' field only if it is present in the request data
+        if 'age' in data:
+            if data['age'] < 18:
+                raise serializers.ValidationError("age should be above 18years")
         return data
 
     # #below code can also perform same as above code but having some issues needs to be fixed
