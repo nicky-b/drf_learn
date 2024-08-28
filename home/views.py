@@ -1,7 +1,22 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Person
-from .serializer import PersonSerializer
+from .serializer import PersonSerializer, LoginSerializer
+
+
+@api_view(['POST'])
+def login(request):
+    data = request.data
+    serializer = LoginSerializer(data = data)
+
+    if serializer.is_valid():
+        print(data) # To debugu the data 
+        data = serializer.validated_data
+        return Response({'message':'success'})
+    else:
+        # Log the errors to the console or return them in the response
+        print(serializer.errors)
+        return Response(serializer.errors, status=400)
 
 
 @api_view(['Get', 'POST']) #Pass the menthod that this function accepts
