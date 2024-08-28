@@ -11,6 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from django.core.paginator import Paginator
+from rest_framework.decorators import action
+
 
 class LoginAPI(APIView):
     def post(self, request):
@@ -198,6 +200,8 @@ class PersonViewSet(viewsets.ModelViewSet):
     serializer_class = PersonSerializer
     queryset = Person.objects.all()
 
+    #If you want to limit the api methods, you need to only accept GET and POST but not PUT/Patch/DELETE, use below and can make modofications as well
+    http_method_name = ['get', 'post']
     #Search feature
     def list(self, request):
         search = request.GET.get('search')
@@ -206,3 +210,14 @@ class PersonViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(name__startswith = search)
         serializer = PersonSerializer(queryset, many = True) 
         return Response({"status": 200, "data": serializer.data})
+
+    @action(detail=True, methods=['post']) #use GET or POST
+    def send_mail_to_person(self, request, pk):
+        #url used api/people/15/send_mail_to_person/
+        obj = Person.objects.get(pk = pk)
+        serializer = PersonSerializer(obj)
+        return Response({
+            "status":True,
+            "message": "email sent successfully",
+            "data": serializer.data
+        })
