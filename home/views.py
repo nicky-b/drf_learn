@@ -1,11 +1,13 @@
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
+from rest_framework import viewsets
 from rest_framework.response import Response
 from .models import Person
 from .serializer import PersonSerializer, LoginSerializer
 
 
 class PersonAPI(APIView):
+    #creating API CRUD Operations using APIVIew Class
     def get(self, request):
         objs = Person.objects.filter(color__isnull = False)
         serializer = PersonSerializer(objs, many=True)
@@ -79,6 +81,7 @@ def index(request):
 
 @api_view(["GET", "POST", "PUT", "PATCH", "DELETE"])
 def person(request):
+    #creating API CRUD Operations using @api_view decorator with a function
     if request.method == "GET":
         objs = Person.objects.filter(color__isnull = False)
         serializer = PersonSerializer(objs, many=True)
@@ -118,3 +121,17 @@ def person(request):
         obj.delete()
         return Response({"message": "person deleted"})
 
+
+class PersonViewSet(viewsets.ModelViewSet):
+    #creating API CRUD Operations using ModelVIewSet 
+    serializer_class = PersonSerializer
+    queryset = Person.objects.all()
+
+    #Search feature
+    def list(self, request):
+        search = request.GET.get('search')
+        queryset = self.queryset
+        if search:
+            queryset = queryset.filter(name__startswith = search)
+        serializer = PersonSerializer(queryset, many = True) 
+        return Response({"status": 200, "data": serializer.data})
